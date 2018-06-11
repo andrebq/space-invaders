@@ -2,6 +2,12 @@
 
 
 [[projects]]
+  name = "github.com/lucasb-eyer/go-colorful"
+  packages = ["."]
+  revision = "345fbb3dbcdb252d9985ee899a84963c0fa24c82"
+  version = "v1.0"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
@@ -37,6 +43,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "8ba16aeadc921f8ea25f820087e96e88ca5d3d41abd899da27793f094e05bd8b"
+  inputs-digest = "ebc9f73e9231a211404834def73739304eb4bac0e7f2b00a9d3c618f21ff0efd"
   solver-name = "gps-cdcl"
   solver-version = 1

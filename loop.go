@@ -35,7 +35,7 @@ func processEvents(win *sdl.Window) bool {
 			return true
 		case *sdl.WindowEvent:
 			if ev.Type == sdl.WINDOWEVENT_CLOSE &&
-				ev.WindowID == win.GetID() {
+				sameWindow(win, ev.WindowID) {
 				// since we only have one window
 				// if it is closed
 				// we can quit
@@ -46,4 +46,13 @@ func processEvents(win *sdl.Window) bool {
 		}
 	}
 	return false
+}
+
+func sameWindow(win *sdl.Window, evWindowID uint32) bool {
+	winID, err := win.GetID()
+	if err != nil {
+		logrus.WithError(err).Error("unable to obtain ID from window")
+		return false
+	}
+	return winID == evWindowID
 }

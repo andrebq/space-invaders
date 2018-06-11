@@ -3,7 +3,6 @@ package render
 import (
 	"github.com/andrebq/space-invaders/ces"
 	"github.com/pkg/errors"
-	"github.com/sirupsen/logrus"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -12,11 +11,16 @@ type (
 		base     ces.BaseSystem
 		win      *sdl.Window
 		renderer *sdl.Renderer
+
+		layers layers
 	}
 
+	layers map[int]*renderList
+
 	renderComponent interface {
-		Texture() *sdl.Texture
-		Rect() sdl.Rect
+		ces.Entity
+		Paint(*sdl.Renderer)
+		ZOrder() int
 	}
 
 	isRenderable struct{}
@@ -31,7 +35,8 @@ func (isRenderable) Filter(e ces.Entity) bool {
 // New returns a new render system
 func New(win *sdl.Window) (ces.RenderSystem, error) {
 	b := ces.BaseSystem{}
-	renderer, err := win.GetRenderer()
+
+	renderer, err := sdl.CreateRenderer(win, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		errors.Wrapf(err, "render: unable to get window renderer")
 	}
@@ -39,6 +44,7 @@ func New(win *sdl.Window) (ces.RenderSystem, error) {
 		base:     b,
 		win:      win,
 		renderer: renderer,
+		layers:   make(layers),
 	}, nil
 }
 
@@ -51,16 +57,45 @@ func (b *renderSystem) EntityFilter() ces.EntityFilter {
 func (b *renderSystem) EntityLifecycle(e ces.EntityLifecycleEvent) {
 	switch {
 	case e.Created:
-		b.base.Watch(e, true)
+		b.add(e.Entity.(renderComponent))
 	case e.Deleted:
-		b.base.Watch(e, false)
+		b.remove(e.Entity.(renderComponent))
+	}
+}
+
+func (b *renderSystem) add(e renderComponent) {
+	e = e.(renderComponent)
+
+	list := b.layers[e.ZOrder()]
+	if list == nil {
+		list = new(renderList)
+		b.layers[e.ZOrder()] = list
+	}
+	list.add(e)
+}
+
+func (b *renderSystem) remove(e renderComponent) {
+	e = e.(renderComponent)
+
+	list := b.layers[e.ZOrder()]
+	if list == nil {
+		list.remove(e)
 	}
 }
 
 // Render prints stuff on the screen
 func (b *renderSystem) Render(dt float64) {
-	logrus.WithField("system", "render").Debug()
-	b.base.ForEach(func(e ces.Entity) {
-		logrus.WithField("entity", e).Debug()
-	})
+
+	b.renderer.Clear()
+
+	for i := 0; i < 100; i++ {
+		l := b.layers[i]
+		if l != nil {
+			for _, renderable := range *l {
+				renderable.Paint(b.renderer)
+			}
+		}
+	}
+
+	b.renderer.Present()
 }
