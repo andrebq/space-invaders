@@ -5,6 +5,8 @@ type (
 	World struct {
 		entities map[Entity]bool
 		systems  map[System]bool
+
+		entitiesIndex map[interface{}]Entity
 	}
 )
 
@@ -25,11 +27,27 @@ func (w *World) addSystem(systems ...System) {
 	}
 }
 
+func (w *World) addToIndex(e Entity) {
+	ie, ok := e.(indexableEntity)
+	if ok {
+		w.entitiesIndex[ie.Key()] = e
+	}
+}
+
+func (w *World) removeFromIndex(e Entity) {
+	ie, ok := e.(indexableEntity)
+	if ok {
+		w.entitiesIndex[ie.Key()] = e
+	}
+}
+
 // AddEntity is called to add a new entity to the world
 // add entity will handle lifecycle events
 func (w *World) AddEntity(entities ...Entity) {
 	for _, e := range entities {
 		w.entities[e] = true
+
+		w.addToIndex(e)
 	}
 
 	for k := range w.systems {
@@ -59,6 +77,8 @@ func (w *World) RemoveEntity(entities ...Entity) {
 					s.EntityLifecycle(ev)
 				}
 			}
+			w.entities[e] = false
+			w.removeFromIndex(e)
 		}
 	}
 }

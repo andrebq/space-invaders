@@ -17,7 +17,7 @@ func (w *World) Iterate(oldTime time.Time) time.Time {
 func (w *World) Update(dt float64) {
 	for s := range w.systems {
 		if s, ok := s.(DynamicSystem); ok {
-			s.Update(dt)
+			s.Update(dt, w)
 		}
 	}
 }

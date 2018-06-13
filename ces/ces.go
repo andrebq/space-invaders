@@ -6,6 +6,14 @@ type (
 	Entity interface {
 	}
 
+	indexableEntity interface {
+		Entity
+
+		// Key returns the key used to index this entity to the system,
+		// it shouldn't change after time
+		Key() interface{}
+	}
+
 	// EntityLifecycleEvent holds information about events associated with an entity
 	EntityLifecycleEvent struct {
 		// Entity associated with the event
@@ -49,7 +57,7 @@ type (
 	DynamicSystem interface {
 		System
 		// Update is used to update entity components
-		Update(dt float64)
+		Update(dt float64, w *World)
 	}
 
 	// InputSystem is a system that process user input

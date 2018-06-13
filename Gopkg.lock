@@ -21,7 +21,10 @@
 
 [[projects]]
   name = "github.com/veandco/go-sdl2"
-  packages = ["sdl"]
+  packages = [
+    "img",
+    "sdl"
+  ]
   revision = "271d2ec43388932fd2a80f4c2e81021734685a62"
   version = "v0.3"
 
@@ -43,6 +46,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "ebc9f73e9231a211404834def73739304eb4bac0e7f2b00a9d3c618f21ff0efd"
+  inputs-digest = "08c2e2222ef23aaf78fa099f340477aa120fbf61cab35d3a6826bde96d0d971b"
   solver-name = "gps-cdcl"
   solver-version = 1

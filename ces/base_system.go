@@ -21,7 +21,12 @@ func (b *BaseSystem) EntityFilter() EntityFilter {
 }
 
 // EntityLifecycle implements ces.System
-func (b *BaseSystem) EntityLifecycle(_ EntityLifecycleEvent) {
+func (b *BaseSystem) EntityLifecycle(ev EntityLifecycleEvent) {
+	if ev.Created {
+		b.Watch(ev.Entity, true)
+	} else if ev.Deleted {
+		b.Watch(ev.Entity, false)
+	}
 }
 
 // Watch adds/removes the given entity to the watch list
