@@ -60,7 +60,7 @@ func (s *Sprite) setupSurface(rgba *sdl.Surface) error {
 	return nil
 }
 
-func (s *Sprite) setupTexture(target *sdl.Renderer) {
+func (s *Sprite) setupTexture(target *Renderer) {
 	var err error
 	s.tex, err = target.CreateTextureFromSurface(s.surf)
 	if err != nil {
@@ -86,12 +86,12 @@ func (s *Sprite) ZOrder() int {
 }
 
 // Paint implements renderable interface
-func (s *Sprite) Paint(target *sdl.Renderer) {
+func (s *Sprite) Paint(target *Renderer) {
 	if s.tex == nil {
 		s.setupTexture(target)
 	}
 
-	err := target.Copy(s.tex, &s.srcRect, &s.Pos)
+	err := target.CopyBottom(s.tex, &s.srcRect, &s.Pos)
 	if err != nil {
 		// now, we can just log
 		logrus.WithError(err).WithField("system", "render:sprite").Error("unable to render texture")

@@ -31,7 +31,7 @@ func NewBackground(c color.Color) *Background {
 func (b *Background) ZOrder() int { return 0 }
 
 // Paint will update target with the current background
-func (b *Background) Paint(target *sdl.Renderer) {
+func (b *Background) Paint(target *Renderer) {
 	target.SetDrawColor(
 		b.color.R,
 		b.color.G,

@@ -13,8 +13,9 @@ type (
 // NewWorld constructs a new world
 func NewWorld(systems ...System) *World {
 	w := &World{
-		entities: make(map[Entity]bool),
-		systems:  make(map[System]bool),
+		entities:      make(map[Entity]bool),
+		entitiesIndex: make(map[interface{}]Entity),
+		systems:       make(map[System]bool),
 	}
 	w.addSystem(systems...)
 	return w
@@ -81,4 +82,10 @@ func (w *World) RemoveEntity(entities ...Entity) {
 			w.removeFromIndex(e)
 		}
 	}
+}
+
+// FindEntity returns the entity indexed by the given key
+func (w *World) FindEntity(key interface{}) (Entity, bool) {
+	e, ok := w.entitiesIndex[key]
+	return e, ok
 }

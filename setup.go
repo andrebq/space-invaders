@@ -17,13 +17,17 @@ func setupWorld(win *sdl.Window, input *input.System) (*ces.World, error) {
 	}
 	w := ces.NewWorld(input, renderSys, game.NewArcade())
 	colorful.FastHappyColor()
+
+	var bounds sdl.Rect
+	bounds.W, bounds.H = win.GetSize()
+
+	w.AddEntity(game.NewWorld(bounds))
 	w.AddEntity(render.NewBackground(colorful.FastHappyColor()))
 
 	player, err := game.NewPlayer(findResource("player.png"))
 	if err != nil {
 		return nil, err
 	}
-
 	w.AddEntity(player)
 
 	return w, nil

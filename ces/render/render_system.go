@@ -10,7 +10,9 @@ type (
 	renderSystem struct {
 		base     ces.BaseSystem
 		win      *sdl.Window
-		renderer *sdl.Renderer
+		renderer *Renderer
+
+		size sdl.Rect
 
 		layers layers
 	}
@@ -19,8 +21,13 @@ type (
 
 	renderComponent interface {
 		ces.Entity
-		Paint(*sdl.Renderer)
+		Paint(*Renderer)
 		ZOrder() int
+	}
+
+	// Renderer adds some helper function on top of sdl default renderer api
+	Renderer struct {
+		*sdl.Renderer
 	}
 
 	isRenderable struct{}
@@ -43,7 +50,7 @@ func New(win *sdl.Window) (ces.RenderSystem, error) {
 	return &renderSystem{
 		base:     b,
 		win:      win,
-		renderer: renderer,
+		renderer: &Renderer{renderer},
 		layers:   make(layers),
 	}, nil
 }
