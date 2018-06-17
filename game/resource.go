@@ -1,4 +1,4 @@
-package main
+package game
 
 import (
 	"image"
@@ -14,6 +14,13 @@ func findResource(name string) string {
 		filepath.FromSlash(path.Join(".", "assets", name)))
 	if err != nil {
 		panic(err)
+	}
+	info, err := os.Stat(absPath)
+	if os.IsNotExist(err) {
+		panic("game:resource: path " + absPath + " does not exists")
+	}
+	if info.IsDir() {
+		panic("game:resource: path " + absPath + " is a directory and should be a file")
 	}
 	return absPath
 }

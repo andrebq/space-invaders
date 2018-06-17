@@ -6,7 +6,7 @@ type (
 		entities map[Entity]bool
 		systems  map[System]bool
 
-		entitiesIndex map[interface{}]Entity
+		entitiesIndex map[interface{}][]Entity
 	}
 )
 
@@ -14,7 +14,7 @@ type (
 func NewWorld(systems ...System) *World {
 	w := &World{
 		entities:      make(map[Entity]bool),
-		entitiesIndex: make(map[interface{}]Entity),
+		entitiesIndex: make(map[interface{}][]Entity),
 		systems:       make(map[System]bool),
 	}
 	w.addSystem(systems...)
@@ -31,14 +31,29 @@ func (w *World) addSystem(systems ...System) {
 func (w *World) addToIndex(e Entity) {
 	ie, ok := e.(indexableEntity)
 	if ok {
-		w.entitiesIndex[ie.Key()] = e
+		w.entitiesIndex[ie.Key()] = append(w.entitiesIndex[ie.Key()], e)
 	}
 }
 
 func (w *World) removeFromIndex(e Entity) {
 	ie, ok := e.(indexableEntity)
 	if ok {
-		w.entitiesIndex[ie.Key()] = e
+		slice := w.entitiesIndex[ie.Key()]
+		if len(slice) == 0 {
+			return
+		}
+		for i, v := range slice {
+			if v == e {
+				slice[i] = nil
+				switch i {
+				case len(slice) - 1:
+					slice = slice[:len(slice)-1]
+				default:
+					slice = append(slice[:i], slice[i+1:]...)
+				}
+			}
+		}
+		w.entitiesIndex[ie.Key()] = slice
 	}
 }
 
@@ -47,8 +62,11 @@ func (w *World) removeFromIndex(e Entity) {
 func (w *World) AddEntity(entities ...Entity) {
 	for _, e := range entities {
 		w.entities[e] = true
-
 		w.addToIndex(e)
+
+		if lcae, ok := e.(lifecycleAwareEntity); ok {
+			lcae.OnAdd(w)
+		}
 	}
 
 	for k := range w.systems {
@@ -80,12 +98,28 @@ func (w *World) RemoveEntity(entities ...Entity) {
 			}
 			w.entities[e] = false
 			w.removeFromIndex(e)
+
+			if lcae, ok := e.(lifecycleAwareEntity); ok {
+				lcae.OnRemove(w)
+			}
 		}
 	}
 }
 
-// FindEntity returns the entity indexed by the given key
-func (w *World) FindEntity(key interface{}) (Entity, bool) {
+// FindFirstEntity returns the first entity indexed by the given key
+func (w *World) FindFirstEntity(key interface{}) (Entity, bool) {
 	e, ok := w.entitiesIndex[key]
-	return e, ok
+	if ok {
+		return e[0], true
+	}
+	return nil, false
+}
+
+// FindAllEntities returns the entities indexed by the given key
+func (w *World) FindAllEntities(key interface{}) ([]Entity, bool) {
+	e, ok := w.entitiesIndex[key]
+	if !ok {
+		return nil, ok
+	}
+	return e, len(e) > 0
 }

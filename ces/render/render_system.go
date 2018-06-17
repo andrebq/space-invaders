@@ -85,7 +85,7 @@ func (b *renderSystem) remove(e renderComponent) {
 	e = e.(renderComponent)
 
 	list := b.layers[e.ZOrder()]
-	if list == nil {
+	if list != nil {
 		list.remove(e)
 	}
 }

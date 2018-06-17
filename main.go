@@ -12,10 +12,6 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-var (
-	enemy1Png = findResource("enemy-1.png")
-)
-
 func init() {
 	runtime.LockOSThread()
 }
@@ -28,9 +24,9 @@ func main() {
 
 	win := createWindow()
 
-	ctx := withSigCatch(context.Background())
+	ctx, cancel := withSigCatch(context.Background())
 	input := input.Get()
-	world, err := setupWorld(win, input)
+	world, err := setupWorld(win, input, cancel)
 	if err != nil {
 		logrus.WithError(err).Error("error during setup")
 	}
@@ -43,7 +39,7 @@ func main() {
 
 func createWindow() *sdl.Window {
 	win, err := sdl.CreateWindow("Go Invade some Spaces!", sdl.WINDOWPOS_CENTERED,
-		sdl.WINDOWPOS_CENTERED, 100, 100, sdl.WINDOW_BORDERLESS)
+		sdl.WINDOWPOS_CENTERED, 800, 400, sdl.WINDOW_BORDERLESS)
 	if err != nil {
 		logrus.WithError(err).Error("unable to create window")
 		// if we don't have a window, there is no need to
@@ -68,7 +64,7 @@ func initSDL() {
 	}
 }
 
-func withSigCatch(ctx context.Context) context.Context {
+func withSigCatch(ctx context.Context) (context.Context, context.CancelFunc) {
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, os.Interrupt, os.Kill)
 
@@ -82,5 +78,5 @@ func withSigCatch(ctx context.Context) context.Context {
 		cancel()
 	}()
 
-	return ctx
+	return ctx, cancel
 }

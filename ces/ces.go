@@ -6,6 +6,11 @@ type (
 	Entity interface {
 	}
 
+	lifecycleAwareEntity interface {
+		OnAdd(w *World)
+		OnRemove(w *World)
+	}
+
 	indexableEntity interface {
 		Entity
 
@@ -65,7 +70,7 @@ type (
 		System
 
 		// Input is called to notify the system that some input was obtained
-		Input(dt float64)
+		Input(dt float64, w *World)
 	}
 
 	// RenderSystem is a system to render game content

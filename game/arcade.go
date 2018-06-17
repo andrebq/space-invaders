@@ -1,6 +1,8 @@
 package game
 
 import (
+	"context"
+
 	"github.com/andrebq/space-invaders/ces"
 )
 
@@ -8,6 +10,8 @@ type (
 	// basic arcade style of dynamic system
 	arcade struct {
 		ces.BaseSystem
+
+		stop context.CancelFunc
 	}
 
 	onlyDynamicEntities struct{}
@@ -27,8 +31,8 @@ func (onlyDynamicEntities) Filter(e ces.Entity) bool {
 }
 
 // NewArcade returns a simple arcade dynamic system
-func NewArcade() ces.DynamicSystem {
-	return &arcade{}
+func NewArcade(stop context.CancelFunc) ces.DynamicSystem {
+	return &arcade{stop: stop}
 }
 
 // EntityFilter returns the expected entity filter
@@ -45,4 +49,11 @@ func (a *arcade) Update(dt float64, w *ces.World) {
 	a.BaseSystem.ForEach(func(e ces.Entity) {
 		e.(dynamicEntity).Update(dt, w)
 	})
+
+	_, playerAlive := w.FindAllEntities(playerKey)
+	_, youWinalive := w.FindAllEntities(youWinKey)
+
+	if !playerAlive && !youWinalive {
+		a.stop()
+	}
 }

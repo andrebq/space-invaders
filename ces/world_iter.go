@@ -26,7 +26,7 @@ func (w *World) Update(dt float64) {
 func (w *World) Input(dt float64) {
 	for s := range w.systems {
 		if s, ok := s.(InputSystem); ok {
-			s.Input(dt)
+			s.Input(dt, w)
 		}
 	}
 }

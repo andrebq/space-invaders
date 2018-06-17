@@ -24,10 +24,11 @@ func (rl *renderList) removeOne(c renderComponent) {
 
 			switch {
 			case i == len(rlSlice)-1:
-				rlSlice = rlSlice[:len(rlSlice)-2]
+				rlSlice = rlSlice[:len(rlSlice)-1]
 			default:
 				rlSlice = append(rlSlice[:i], rlSlice[i+1:]...)
 			}
 		}
 	}
+	*rl = rlSlice
 }

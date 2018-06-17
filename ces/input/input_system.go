@@ -13,14 +13,29 @@ import (
 type (
 	// System is the input system
 	System struct {
-		ces.System
+		ces.BaseSystem
 
 		quit bool
 	}
+
+	keyAwareEntity interface {
+		KeyUp(ev *sdl.KeyboardEvent, w *ces.World)
+		KeyDown(ev *sdl.KeyboardEvent, w *ces.World)
+	}
+
+	keyAwareEntityFilterType struct{}
 )
+
+// Filter implements ces.EntityFilter
+func (keyAwareEntityFilterType) Filter(e ces.Entity) bool {
+	_, ok := e.(keyAwareEntity)
+	return ok
+}
 
 var (
 	theInput *System
+
+	keyAwareEntityFilter keyAwareEntityFilterType
 
 	lock sync.Mutex
 )
@@ -32,11 +47,16 @@ func Get() *System {
 
 	if theInput == nil {
 		theInput = &System{
-			System: &ces.BaseSystem{},
+			BaseSystem: ces.BaseSystem{},
 		}
 	}
 
 	return theInput
+}
+
+// EntityFilter implements ces.System
+func (s *System) EntityFilter() ces.EntityFilter {
+	return keyAwareEntityFilter
 }
 
 // ShouldQuit returns true if sdl.QuitEvent was received
@@ -45,13 +65,28 @@ func (s *System) ShouldQuit() bool {
 }
 
 // Input implements ces.InputSystem
-func (s *System) Input(dt float64) {
+func (s *System) Input(dt float64, w *ces.World) {
 	for ev := sdl.PollEvent(); ev != nil; ev = sdl.PollEvent() {
 		switch ev := ev.(type) {
 		case *sdl.QuitEvent:
 			s.quit = true
-		default:
+		case *sdl.KeyboardEvent:
+			if ev.Type == sdl.KEYDOWN {
+				s.dispatchKeyEvent(ev, w)
+			} else if ev.Type == sdl.KEYUP {
+				s.dispatchKeyEvent(ev, w)
+			}
 			logrus.WithField("ev", fmt.Sprintf("%#v", ev)).Debug()
 		}
 	}
+}
+
+func (s *System) dispatchKeyEvent(ev *sdl.KeyboardEvent, w *ces.World) {
+	s.BaseSystem.ForEach(func(e ces.Entity) {
+		if ev.Type == sdl.KEYDOWN {
+			e.(keyAwareEntity).KeyDown(ev, w)
+		} else if ev.Type == sdl.KEYUP {
+			e.(keyAwareEntity).KeyUp(ev, w)
+		}
+	})
 }

@@ -9,6 +9,18 @@ type (
 	// World holds the simulation parameters
 	World struct {
 		bounds sdl.Rect
+
+		collidables collidables
+	}
+
+	bboxed interface {
+		ces.Entity
+		BBox() sdl.Rect
+	}
+
+	collidable interface {
+		bboxed
+		Collision(other ces.Entity)
 	}
 )
 
@@ -19,14 +31,15 @@ var (
 // NewWorld configures a new world
 func NewWorld(bounds sdl.Rect) *World {
 	return &World{
-		bounds: bounds,
+		bounds:      bounds,
+		collidables: make(collidables, 0),
 	}
 }
 
 // GetWorld returns the game world for the given ces.World
 // it will panic if the world isn't available
 func GetWorld(w *ces.World) *World {
-	entity, ok := w.FindEntity(worldKey)
+	entity, ok := w.FindFirstEntity(worldKey)
 	if !ok {
 		panic("game:world unable to find world entity")
 	}
@@ -46,4 +59,35 @@ func (w *World) Key() interface{} {
 // GetBounds return the size of the world
 func (w *World) GetBounds() sdl.Rect {
 	return w.bounds
+}
+
+// GetCentered returns the same rectangle but with its X/Y values
+// moved to a specific value which will put the center if rectangle A
+// in the center of the world bounds
+func (w *World) GetCentered(r sdl.Rect) sdl.Rect {
+	b := w.GetBounds()
+	r.X = (b.W-b.X)/2 - (r.W / 2)
+	r.Y = (b.H-b.Y)/2 - (r.H / 2)
+	return r
+}
+
+func (w *World) addCollidable(c collidable) {
+	w.collidables.add(c)
+}
+
+func (w *World) removeCollidable(c collidable) {
+	w.collidables.remove(c)
+}
+
+func (w *World) checkCollision(e bboxed) bool {
+	box := e.BBox()
+	var collision bool
+	for _, v := range w.collidables {
+		vbox := v.BBox()
+		if _, ok := vbox.Intersect(&box); ok {
+			v.Collision(e)
+			collision = true
+		}
+	}
+	return collision
 }
