@@ -15,11 +15,14 @@ type (
 
 		direction int32
 		consumed  bool
+		speed     float64
+
+		owner interface{}
 	}
 )
 
 // NewGun returns a new Gun ship
-func NewGun(gunFrames, gunAnimation string) (*Gun, error) {
+func NewGun(gunFrames, gunAnimation string, owner interface{}) (*Gun, error) {
 	sp, err := render.NewSprite(gunFrames, gunAnimation, 98)
 	if err != nil {
 		return nil, errors.Wrap(err, "game:gun unable to load Gun sprite")
@@ -28,9 +31,16 @@ func NewGun(gunFrames, gunAnimation string) (*Gun, error) {
 	p := &Gun{
 		Sprite:    sp,
 		direction: 1,
+		owner:     owner,
+		speed:     400,
 	}
 
 	return p, nil
+}
+
+// SetSpeed changes the gun speed
+func (p *Gun) SetSpeed(nval float64) {
+	p.speed = nval
 }
 
 // BBox implements bboxed interface
@@ -62,16 +72,17 @@ func (p *Gun) MoveTo(target sdl.Point) {
 // Update implements the interface required by dynamic system
 func (p *Gun) Update(dt float64, w *ces.World) {
 	npos := p.Pos
-	change := int32(dt*400) * p.direction
+	change := int32(dt*p.speed) * p.direction
 	npos.Y += change
 	gameWorld := GetWorld(w)
 	rect := gameWorld.GetBounds()
 
 	p.Sprite.UpdateAnimation(dt)
 
-	if gameWorld.checkCollision(p) {
+	gameWorld.checkCollision(p)
+
+	if p.consumed {
 		w.RemoveEntity(p)
-		return
 	}
 
 	if !math.FullyInside(rect, p.Sprite.RectAt(npos)) {

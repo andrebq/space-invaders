@@ -4,17 +4,18 @@ import (
 	"github.com/veandco/go-sdl2/sdl"
 )
 
-// CopyBottom works like copy but it will match the bottom-left corner of pos
-// to the bottom-left of the screen,
+// ToBottom takes the given input rectangle and transforms it using
+// the current viewport to match the bottom-left corner of the rectangle
+// to the bottom-left corner of the viewport.
+//
+// Usually (0,0) maps to the top-left corner of the output, and most of the time
+// we develop considering (0,0) to be the bottom-right.
 //
 // Eg.: a 32x32 rect at position (1, 1) rendered into a screen of (800, 800) will be
 // rendered at (1, 800 /* screen height */ - 32 /* rect height */ - 1 /* rect Y position */)
-//
-// The original rect isn't changed in this operation
-func (r *Renderer) CopyBottom(tex *sdl.Texture, src, dest *sdl.Rect) error {
-	destCopy := *dest
+func (r *Renderer) ToBottom(rect sdl.Rect) *sdl.Rect {
 	vp := r.GetViewport()
 
-	destCopy.Y = vp.H - destCopy.H - destCopy.Y
-	return r.Copy(tex, src, &destCopy)
+	rect.Y = vp.H - rect.H - rect.Y
+	return &rect
 }

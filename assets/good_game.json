@@ -1,6 +1,6 @@
 { "frames": [
    {
-    "filename": "you_win 0.ase",
+    "filename": "good_game 0.ase",
     "frame": { "x": 0, "y": 0, "w": 100, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -9,7 +9,7 @@
     "duration": 250
    },
    {
-    "filename": "you_win 1.ase",
+    "filename": "good_game 1.ase",
     "frame": { "x": 100, "y": 0, "w": 100, "h": 32 },
     "rotated": false,
     "trimmed": false,
@@ -21,7 +21,7 @@
  "meta": {
   "app": "http://www.aseprite.org/",
   "version": "1.2.5",
-  "image": "/home/andre/go/src/github.com/andrebq/space-invaders/assets/you_win.png",
+  "image": "/home/andre/go/src/github.com/andrebq/space-invaders/assets/good_game.png",
   "format": "RGBA8888",
   "size": { "w": 200, "h": 32 },
   "scale": "1",

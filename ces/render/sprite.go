@@ -116,7 +116,7 @@ func (s *Sprite) Paint(target *Renderer) {
 	rect := ase2sdlRect(s.animated.Rect())
 	destRect := point2Rect(s.Pos, rect)
 
-	err := target.CopyBottom(s.tex, &rect, &destRect)
+	err := target.Copy(s.tex, &rect, target.ToBottom(destRect))
 	if err != nil {
 		// now, we can just log
 		logrus.WithError(err).WithField("system", "render:sprite").Error("unable to render texture")

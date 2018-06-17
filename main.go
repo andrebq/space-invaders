@@ -39,7 +39,7 @@ func main() {
 
 func createWindow() *sdl.Window {
 	win, err := sdl.CreateWindow("Go Invade some Spaces!", sdl.WINDOWPOS_CENTERED,
-		sdl.WINDOWPOS_CENTERED, 800, 400, sdl.WINDOW_BORDERLESS)
+		sdl.WINDOWPOS_CENTERED, 800, 400, 0)
 	if err != nil {
 		logrus.WithError(err).Error("unable to create window")
 		// if we don't have a window, there is no need to

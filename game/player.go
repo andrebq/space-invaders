@@ -17,6 +17,8 @@ type (
 
 		// how many time until the next fire
 		gunCooldown float64
+
+		killed bool
 	}
 )
 
@@ -76,6 +78,12 @@ func (p *Player) KeyUp(ev *sdl.KeyboardEvent, w *ces.World) {
 
 // Update implements the interface required by dynamic system
 func (p *Player) Update(dt float64, w *ces.World) {
+	if p.killed {
+		w.RemoveEntity(p)
+		CreateGoodGame(w)
+		return
+	}
+
 	_, enemiesAlive := w.FindAllEntities(enemyKey)
 	if !enemiesAlive {
 		p.direction = 0
@@ -115,4 +123,34 @@ func (p *Player) tryFireGun(w *ces.World) {
 		CreatePlayerGun(w, p)
 		p.gunCooldown = 1.0 / 5 /* 100 shots per second */
 	}
+}
+
+// BBox returns the bounding box for ths object
+func (p *Player) BBox() sdl.Rect {
+	return p.RectAt(p.Pos)
+}
+
+// Collision is called when a colliction with another object happens
+func (p *Player) Collision(e ces.Entity) {
+	g, ok := e.(*Gun)
+	if !ok {
+		return
+	}
+	if g.consumed || g.owner == playerKey {
+		return
+	}
+	// consumes the bullet to prevent it from
+	// killing another ET
+	g.consumed = true
+	p.killed = true
+}
+
+// OnAdd implements lifecycle aware interface
+func (p *Player) OnAdd(w *ces.World) {
+	GetWorld(w).addCollidable(p)
+}
+
+// OnRemove implements lifecycle aware interface
+func (p *Player) OnRemove(w *ces.World) {
+	GetWorld(w).removeCollidable(p)
 }

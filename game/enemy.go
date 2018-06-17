@@ -2,6 +2,7 @@ package game
 
 import (
 	"math/rand"
+	"time"
 
 	"github.com/andrebq/space-invaders/ces"
 	"github.com/andrebq/space-invaders/ces/math"
@@ -18,11 +19,16 @@ type (
 		direction    int32
 		reverseCount int
 		killed       bool
+
+		// how many time until the next fire
+		gunCooldown float64
 	}
 )
 
 var (
 	enemyKey = new(int)
+
+	rnder = rand.New(rand.NewSource(time.Now().Unix()))
 )
 
 // NewEnemy returns a new Enemy ship
@@ -33,11 +39,17 @@ func NewEnemy(enemyFrames, enemyAnimation string) (*Enemy, error) {
 	}
 
 	p := &Enemy{
-		Sprite:    sp,
-		direction: randDirection(rand.Float32()),
+		Sprite:      sp,
+		direction:   randDirection(rand.Float32()),
+		gunCooldown: rnder.NormFloat64() * 10,
 	}
 
 	return p, nil
+}
+
+// Paint implements renderable interface
+func (p *Enemy) Paint(r *render.Renderer) {
+	p.Sprite.Paint(r)
 }
 
 // Key implements index entities
@@ -66,7 +78,7 @@ func (p *Enemy) Collision(e ces.Entity) {
 	if !ok {
 		return
 	}
-	if g.consumed {
+	if g.consumed || g.owner == enemyKey {
 		return
 	}
 	// consumes the bullet to prevent it from
@@ -101,9 +113,14 @@ func (p *Enemy) Update(dt float64, w *ces.World) {
 	if p.killed {
 		w.RemoveEntity(p)
 		CreateExplosion(w, p.Pos)
+		return
 	}
 
-	if p.reverseCount > 0 {
+	if rnder.Float32() <= 0.02 {
+		p.tryFireGun(w)
+	}
+
+	if p.reverseCount > 3 {
 		p.nextLane()
 	}
 
@@ -121,6 +138,7 @@ func (p *Enemy) Update(dt float64, w *ces.World) {
 		return
 	}
 	p.Pos = npos
+	p.gunCooldown -= dt
 }
 
 func (p *Enemy) nextLane() {
@@ -135,6 +153,13 @@ func (p *Enemy) reverseDirection() {
 		return
 	}
 	p.direction = -1
+}
+
+func (p *Enemy) tryFireGun(w *ces.World) {
+	if p.gunCooldown <= 0 {
+		CreateEnemyGun(w, p)
+		p.gunCooldown = 1.0 / 0.2 /* 5 shots per second */
+	}
 }
 
 func randDirection(f float32) int32 {

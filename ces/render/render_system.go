@@ -1,6 +1,8 @@
 package render
 
 import (
+	"time"
+
 	"github.com/andrebq/space-invaders/ces"
 	"github.com/pkg/errors"
 	"github.com/veandco/go-sdl2/sdl"
@@ -46,6 +48,10 @@ func New(win *sdl.Window) (ces.RenderSystem, error) {
 	renderer, err := sdl.CreateRenderer(win, -1, sdl.RENDERER_ACCELERATED)
 	if err != nil {
 		errors.Wrapf(err, "render: unable to get window renderer")
+	}
+
+	if win.GetFlags()|sdl.WINDOW_FULLSCREEN > 0 {
+		time.Sleep(time.Second * 1)
 	}
 	return &renderSystem{
 		base:     b,

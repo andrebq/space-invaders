@@ -48,3 +48,13 @@ func Corners(r sdl.Rect) (tr, br, bl, tl sdl.Point) {
 	}
 	return
 }
+
+// ExpandFromCenter expands the rectangle by the given ammount but keeps the center
+// if ammount is negative the rectangle is shrinked
+func ExpandFromCenter(r sdl.Rect, ammount int32) sdl.Rect {
+	r.X -= ammount
+	r.Y -= ammount
+	r.W += ammount
+	r.H += ammount
+	return r
+}

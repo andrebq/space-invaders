@@ -20,11 +20,14 @@ var (
 
 	youWinFrames    = findResource("you_win.png")
 	youWinAnimation = findResource("you_win.json")
+
+	goodGameFrames    = findResource("good_game.png")
+	goodGameAnimation = findResource("good_game.json")
 )
 
 // CreatePlayerGun creates a new gun element fired by the player
 func CreatePlayerGun(w *ces.World, p *Player) (*Gun, error) {
-	gun, err := NewGun(gunFrames, gunAnimation)
+	gun, err := NewGun(gunFrames, gunAnimation, p.Key())
 	if err != nil {
 		return nil, err
 	}
@@ -33,6 +36,23 @@ func CreatePlayerGun(w *ces.World, p *Player) (*Gun, error) {
 		X: p.Pos.X,
 		Y: p.Pos.Y + 40,
 	})
+	w.AddEntity(gun)
+	return gun, nil
+}
+
+// CreateEnemyGun creates a new gun element fired by the enemy
+func CreateEnemyGun(w *ces.World, p *Enemy) (*Gun, error) {
+	gun, err := NewGun(gunFrames, gunAnimation, p.Key())
+	if err != nil {
+		return nil, err
+	}
+
+	gun.MoveTo(sdl.Point{
+		X: p.Pos.X,
+		Y: p.Pos.Y - 5,
+	})
+	gun.SetDirection(-1)
+	gun.SetSpeed(200)
 	w.AddEntity(gun)
 	return gun, nil
 }
@@ -77,7 +97,7 @@ func CreateEnemyLane(w *ces.World, lane int32) error {
 
 	for i := 0; i < 4; i++ {
 		e, err := CreateEnemy(w, sdl.Point{
-			Y: centeredRect.Y + (lane * 40) - 20,
+			Y: centeredRect.Y + 50 + (lane * 40),
 			X: centeredRect.X - (int32(i) * 40),
 		})
 		if err != nil {
@@ -88,7 +108,7 @@ func CreateEnemyLane(w *ces.World, lane int32) error {
 
 	for i := 0; i < 4; i++ {
 		e, err := CreateEnemy(w, sdl.Point{
-			Y: centeredRect.Y + (lane * 40) - 20,
+			Y: centeredRect.Y + 50 + (lane * 40),
 			X: centeredRect.X + (int32(i) * 40),
 		})
 		if err != nil {
@@ -112,8 +132,24 @@ func CreateExplosion(w *ces.World, pos sdl.Point) (*Explosion, error) {
 }
 
 // CreateYouWin adds the YouWin banner
-func CreateYouWin(w *ces.World) (*YouWin, error) {
-	youwin, err := NewYouWin(youWinFrames, youWinAnimation)
+func CreateYouWin(w *ces.World) (*EndAnimation, error) {
+	youwin, err := NewGameEnd(youWinFrames, youWinAnimation)
+	if err != nil {
+		return nil, err
+	}
+	w.AddEntity(youwin)
+	centeredRect := GetWorld(w).GetCentered(youwin.RectAt(sdl.Point{}))
+	youwin.MoveTo(sdl.Point{
+		X: centeredRect.X,
+		Y: centeredRect.Y,
+	})
+
+	return youwin, nil
+}
+
+// CreateGoodGame adds the YouWin banner
+func CreateGoodGame(w *ces.World) (*EndAnimation, error) {
+	youwin, err := NewGameEnd(goodGameFrames, goodGameAnimation)
 	if err != nil {
 		return nil, err
 	}

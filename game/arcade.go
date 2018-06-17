@@ -51,9 +51,9 @@ func (a *arcade) Update(dt float64, w *ces.World) {
 	})
 
 	_, playerAlive := w.FindAllEntities(playerKey)
-	_, youWinalive := w.FindAllEntities(youWinKey)
+	_, endAnimationAlive := w.FindAllEntities(endAnimationKey)
 
-	if !playerAlive && !youWinalive {
+	if !playerAlive && !endAnimationAlive {
 		a.stop()
 	}
 }
