@@ -25,7 +25,11 @@ var (
 	goodGameFrames    = findResource("good_game.png")
 	goodGameAnimation = findResource("good_game.json")
 
-	bombSfx = findResource("bomb_explosion.wav")
+	bombSfx      = findResource("bomb_explosion.wav")
+	playerGunSfx = findResource("explosion-1.wav")
+
+	youWinSfx   = findResource("special01.wav")
+	goodGameSfx = findResource("special02.wav")
 )
 
 // CreatePlayerGun creates a new gun element fired by the player
@@ -40,6 +44,9 @@ func CreatePlayerGun(w *ces.World, p *Player) (*Gun, error) {
 		Y: p.Pos.Y + 40,
 	})
 	w.AddEntity(gun)
+
+	CreatePlayerGunSfx(w)
+
 	return gun, nil
 }
 
@@ -148,6 +155,7 @@ func CreateYouWin(w *ces.World) (*EndAnimation, error) {
 		X: centeredRect.X,
 		Y: centeredRect.Y,
 	})
+	CreateYouWinSfx(w)
 
 	return youwin, nil
 }
@@ -164,6 +172,7 @@ func CreateGoodGame(w *ces.World) (*EndAnimation, error) {
 		X: centeredRect.X,
 		Y: centeredRect.Y,
 	})
+	CreateYouLoseSfx(w)
 
 	return youwin, nil
 }
@@ -171,6 +180,34 @@ func CreateGoodGame(w *ces.World) (*EndAnimation, error) {
 // CreateExplosionSfx creates a new sound effect for explosions
 func CreateExplosionSfx(w *ces.World) (*sfx.Effect, error) {
 	effect, err := sfx.NewEffect(bombSfx)
+	if err != nil {
+		return nil, err
+	}
+	w.AddEntity(effect)
+	return effect, nil
+}
+
+// CreatePlayerGunSfx creates a new sound effect for player gun fire
+func CreatePlayerGunSfx(w *ces.World) (*sfx.Effect, error) {
+	effect, err := sfx.NewEffect(playerGunSfx)
+	if err != nil {
+		return nil, err
+	}
+	w.AddEntity(effect)
+	return effect, nil
+}
+
+func CreateYouWinSfx(w *ces.World) (*sfx.Effect, error) {
+	effect, err := sfx.NewEffect(youWinSfx)
+	if err != nil {
+		return nil, err
+	}
+	w.AddEntity(effect)
+	return effect, nil
+}
+
+func CreateYouLoseSfx(w *ces.World) (*sfx.Effect, error) {
+	effect, err := sfx.NewEffect(goodGameSfx)
 	if err != nil {
 		return nil, err
 	}
