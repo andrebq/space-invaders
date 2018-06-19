@@ -2,6 +2,7 @@ package game
 
 import (
 	"github.com/andrebq/space-invaders/ces"
+	"github.com/andrebq/space-invaders/ces/sfx"
 	"github.com/veandco/go-sdl2/sdl"
 )
 
@@ -23,6 +24,8 @@ var (
 
 	goodGameFrames    = findResource("good_game.png")
 	goodGameAnimation = findResource("good_game.json")
+
+	bombSfx = findResource("bomb_explosion.wav")
 )
 
 // CreatePlayerGun creates a new gun element fired by the player
@@ -128,6 +131,8 @@ func CreateExplosion(w *ces.World, pos sdl.Point) (*Explosion, error) {
 	w.AddEntity(explosion)
 	explosion.MoveTo(pos)
 
+	CreateExplosionSfx(w)
+
 	return explosion, nil
 }
 
@@ -161,4 +166,14 @@ func CreateGoodGame(w *ces.World) (*EndAnimation, error) {
 	})
 
 	return youwin, nil
+}
+
+// CreateExplosionSfx creates a new sound effect for explosions
+func CreateExplosionSfx(w *ces.World) (*sfx.Effect, error) {
+	effect, err := sfx.NewEffect(bombSfx)
+	if err != nil {
+		return nil, err
+	}
+	w.AddEntity(effect)
+	return effect, nil
 }

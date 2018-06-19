@@ -7,6 +7,8 @@ import (
 	"os/signal"
 	"runtime"
 
+	"github.com/andrebq/space-invaders/ces/sfx"
+
 	"github.com/andrebq/space-invaders/ces/input"
 	"github.com/sirupsen/logrus"
 	"github.com/veandco/go-sdl2/sdl"
@@ -26,6 +28,10 @@ func main() {
 
 	ctx, cancel := withSigCatch(context.Background())
 	input := input.Get()
+
+	closeSound := initSound(ctx)
+	defer closeSound()
+
 	world, err := setupWorld(win, input, cancel)
 	if err != nil {
 		logrus.WithError(err).Error("error during setup")
@@ -79,4 +85,12 @@ func withSigCatch(ctx context.Context) (context.Context, context.CancelFunc) {
 	}()
 
 	return ctx, cancel
+}
+
+func initSound(ctx context.Context) func() {
+	closeSound, err := sfx.InitAudio()
+	if err != nil {
+		panic("main: unable to start audio " + err.Error())
+	}
+	return closeSound
 }

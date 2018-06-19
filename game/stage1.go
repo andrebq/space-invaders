@@ -16,5 +16,6 @@ func (w *World) Stage1(cesw *ces.World) error {
 			return err
 		}
 	}
+
 	return nil
 }
