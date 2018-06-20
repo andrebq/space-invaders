@@ -105,7 +105,6 @@ func (p *Player) Update(dt float64, w *ces.World) {
 		// do not change the position
 		return
 	} else if math.FullyOutside(rect, p.Sprite.RectAt(npos)) && !enemiesAlive {
-		CreateYouWin(w)
 		w.RemoveEntity(p)
 	}
 	p.gunCooldown -= dt
@@ -113,6 +112,10 @@ func (p *Player) Update(dt float64, w *ces.World) {
 	if !enemiesAlive {
 		change = int32(dt * 500)
 		npos.Y += change
+
+		if _, ok := w.FindAllEntities(endAnimationKey); !ok {
+			CreateYouWin(w)
+		}
 	}
 
 	p.Pos = npos
