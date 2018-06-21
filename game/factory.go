@@ -30,6 +30,8 @@ var (
 
 	youWinSfx   = findResource("special01.wav")
 	goodGameSfx = findResource("special02.wav")
+
+	backgroundMusic = findResource("deep-hunt_rafael-oliveira.ogg")
 )
 
 // CreatePlayerGun creates a new gun element fired by the player
@@ -213,4 +215,13 @@ func CreateYouLoseSfx(w *ces.World) (*sfx.Effect, error) {
 	}
 	w.AddEntity(effect)
 	return effect, nil
+}
+
+func CreateBackgroundMusic(w *ces.World) (*sfx.Music, error) {
+	music, err := sfx.NewMusic(backgroundMusic)
+	if err != nil {
+		return nil, err
+	}
+	w.AddEntity(music)
+	return music, nil
 }

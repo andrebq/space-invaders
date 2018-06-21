@@ -17,5 +17,7 @@ func (w *World) Stage1(cesw *ces.World) error {
 		}
 	}
 
+	CreateBackgroundMusic(cesw)
+
 	return nil
 }
